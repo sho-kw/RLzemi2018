@@ -9,11 +9,8 @@ def main():
     env = gym.make('CartPole-v0')
     nprand.seed(123)
     env.seed(123)
-
     env.render()
-    
 
-    
     LEVEL = 0
     if LEVEL == 0:
         env.env.theta_threshold_radians = 45 * 2 * math.pi / 360
@@ -29,15 +26,11 @@ def main():
 
     RIGHT = 1
     LEFT = 0
+    key_action = 0
     
-    key_action = RIGHT
-
     def choose_action(state):
         x, dx, w, dw = state
-        if dw>0:
-            return RIGHT
-        if dw<0:
-            return LEFT
+        #場合分け
                 
     def key_press(key, mod):
         nonlocal key_action
@@ -57,7 +50,7 @@ def main():
         while not done:
             sleep(SLOW)
             env.render()
-            action = key_action
+            action = key_action      #行動の選択#
             state, _, done, _ = env.step(action)
             t += 1
             if done:
@@ -68,8 +61,6 @@ def main():
                     print(state)
                 break
         sleep(1.0)
-    
-    print('Result : ', clear_count)
 
 if __name__ == '__main__':
     main()
