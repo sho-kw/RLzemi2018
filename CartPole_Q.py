@@ -8,25 +8,23 @@ def main():
     env = gym.make('CartPole-v0')
     nprand.seed(123)
     env.seed(123)
-#    env.env.theta_threshold_radians = 45 * 2 * math.pi / 360
     env.render()
      
     gamma = 0.99 # PARAM
     eps = 0.05 # PARAM
-    alpha = 0.7 # PARAM
+    alpha = 1.0 # PARAM
 
     RIGHT = 1
     LEFT = 0
     
     training = True
 
-    X = np.linspace(-1, 1, 1) # PARAM
+    X = np.linspace(-1, 1, 10) # PARAM
     dX = np.linspace(-1, 1, 10) # PARAM
-    W = np.linspace(-0.2, 0.2, 20) # PARAM
-    dW = np.linspace(-2, 2, 20) # PARAM
+    W = np.linspace(-1, 1, 10) # PARAM
+    dW = np.linspace(-1, 1, 10) # PARAM
     
     Q = nprand.rand(len(X) + 1, len(dX) + 1, len(W) + 1, len(dW) + 1, 2)
-    print('Q shape =', Q.shape)
 
     def choose_action(state):
         if training and nprand.rand() < eps:
@@ -37,9 +35,9 @@ def main():
     def update(state, action, reward, end, next_state):
         if end:
             val = Q[state_to_index(state)][action]
-            Q[state_to_index(state)][action] += alpha * (reward - Q[state_to_index(state)][action])
+            Q[state_to_index(state)][action] =  reward
         else:
-            Q[state_to_index(state)][action] += alpha * (reward + gamma * np.max(Q[state_to_index(next_state)]) - Q[state_to_index(state)][action])
+            Q[state_to_index(state)][action] = reward + gamma * np.max(Q[state_to_index(next_state)])
     
     def state_to_index(state):
         x, dx, w, dw = state
@@ -52,7 +50,6 @@ def main():
                 else:
                     break
             return idx
-#            return np.digitize(np.array([val]), l)[0]
 
         return search_index(x, X), search_index(dx, dX), search_index(w, W), search_index(dw, dW)
 
