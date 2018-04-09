@@ -25,7 +25,6 @@ def main():
     dW = np.linspace(-2, 2, 20) # PARAM
     
     Q = nprand.rand(len(X) + 1, len(dX) + 1, len(W) + 1, len(dW) + 1, 2)
-    print('Q shape =', Q.shape)
 
     def choose_action(state):
         if training and nprand.rand() < eps:
