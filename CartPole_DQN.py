@@ -20,7 +20,7 @@ def main():
     
     training = True
     
-    
+
 #    def update(state, action, reward, end, next_state):
 #        if end:
 #            val = Q[state_to_index(state)][action]

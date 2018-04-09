@@ -5,7 +5,6 @@ import math
 import gym
 
 
-
 def main():
     env = gym.make('CartPole-v0')
     nprand.seed(123)

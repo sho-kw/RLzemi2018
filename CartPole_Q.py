@@ -10,7 +10,7 @@ def main():
     env.seed(123)
 #    env.env.theta_threshold_radians = 45 * 2 * math.pi / 360
     env.render()
-    
+     
     gamma = 0.99 # PARAM
     eps = 0.05 # PARAM
     alpha = 0.7 # PARAM
