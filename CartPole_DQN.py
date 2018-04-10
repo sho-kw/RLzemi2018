@@ -68,7 +68,7 @@ def main():
         #reward_sum = 0
         #print(episode)
         print(state)
-        action = agent.start_episode(state)
+        action = 1#agent.start_episode(state)
         
         while not done:
             if not training:
