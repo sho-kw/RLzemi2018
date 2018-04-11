@@ -1,106 +1,55 @@
+import tensorflow as tf
+from keras import backend as K
+K.set_session(tf.Session(graph=tf.get_default_graph(), config=tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)))
+
+from kdrl.agents.dqn import DQNAgent
+from kdrl.policy import *
+from kdrl.trainer import GymTrainer
 import numpy as np
-import numpy.random as nprand
-from time import sleep
-import math
+
+from keras.models import Sequential
+from keras.layers import InputLayer, Dense
+
 import gym
 
-from kdrl.agents import *
-from kdrl.policy import *
-from kdrl.memory import *
-from keras.models import Sequential
-from keras.layers import InputLayer, Dense, Dropout
+EPOCHS_PER_TRAIN = 200   #PARAM
+NUM_TEST = 1
+EPOCHS_PER_TEST = 10
 
+def get_model(state_shape, num_actions):#PARAM
+    return Sequential([InputLayer(input_shape=state_shape),
+                       Dense(4, activation='relu'),
+                       Dense(4, activation='relu'),
+                       Dense(4, activation='relu'),
+                       Dense(num_actions)])
+
+def test(test_id):
+    np.random.seed(test_id)
+    tf.set_random_seed(test_id)
+    env = gym.make('CartPole-v0')
+    env.seed(test_id)
+    #
+    state_shape = env.observation_space.shape
+    num_actions = env.action_space.n
+    agent = DQNAgent(action_space=num_actions,
+                     core_model=get_model(state_shape, num_actions),
+                     optimizer='adam',#PARAM
+                     policy=EpsilonGreedy(eps=0.5),#PARAM
+                     loss='mean_squared_error',
+                     memory=30000,
+                     )
+    trainer = GymTrainer(env, agent)
+    # training
+    trainer.train(EPOCHS_PER_TRAIN)
+    # test
+    result = trainer.test(EPOCHS_PER_TEST, render=True)
+    return result['reward'].count(200)
 
 def main():
-    env = gym.make('CartPole-v0')
-    nprand.seed(123)
-    env.seed(123)
-    #env.env.theta_threshold_radians = 45 * 2 * math.pi / 360
-    env.render()
-    
-    training = True
-    
+    success = sum([test(i) for i in range(NUM_TEST)])
+    print('result :',
+          'OK ' if success > NUM_TEST*EPOCHS_PER_TEST*0.75 else 'NG ',
+          '({0:.3f}%)'.format(100*success/(NUM_TEST*EPOCHS_PER_TEST)))
 
-#    def update(state, action, reward, end, next_state):
-#        if end:
-#            val = Q[state_to_index(state)][action]
-#            Q[state_to_index(state)][action] += alpha * (reward - Q[state_to_index(state)][action])
-#        else:
-#            Q[state_to_index(state)][action] += alpha * (reward + gamma * np.max(Q[state_to_index(next_state)]) - Q[state_to_index(state)][action])
-    
-#    def state_to_index(state):
-#        x, dx, w, dw = state
-
-#        def search_index(val, l):
-#            idx = 0
-#            for boundary in l:
-#                if val > boundary:
-#                    idx += 1
-#                else:
-#                    break
-#            return idx
-#            return np.digitize(np.array([val]), l)[0]
-#
-#        return search_index(x, X), search_index(dx, dX), search_index(w, W), search_index(dw, dW)
-
-    def get_model(state_shape, action_space):
-        return Sequential([InputLayer(input_shape=state_shape),
-                        Dense(16, activation='relu'),
-                        Dense(16, activation='relu'),        
-                        Dense(action_space)])
-
-    state_shape = (4,)
-    action_space = 2
-    agent = DQNAgent(core_model=get_model(state_shape, action_space),
-                     action_space=action_space,
-                     optimizer='adam',
-                     policy=Boltzmann(),
-                     memory=50000,
-                     batch_size=32
-                     )
-    clear_count = 0
-
-    for episode in range(2000 + 1):
-        state = env.reset()
-        done = False
-        t = 0
-        training = (episode % 200 != 0)
-        #reward_sum = 0
-        #print(episode)
-        print(state)
-        action = 1#agent.start_episode(state)
-        
-        while not done:
-            if not training:
-                env.render()
-                #sleep(0.01)
-            #reward_sum += reward
-            if not done:
-                next_state, reward, done, _ = env.step(action)
-                reward = 1 - abs(next_state[2])
-                action = agent.step(state, reward)
-                continue
-            else:
-                next_state, reward, done, _ = env.step(action)
-                reward = 0
-                agent.end_episode(state, reward)
-                break
-            #update(state, action, reward, done, next_state)
-            state = next_state
-            t += 1
-            if done:
-                if not training:
-                    print("Episode {} finished after {} timesteps".format(episode, t + 1))
-                    if t >= 200:
-                        print(state, 'CLEAR')
-                        clear_count += 1
-                    else:
-                        print(state)
-                break
-    
-    print('Result : ', clear_count)
-       
-    
-          
 if __name__ == '__main__':
     main()
