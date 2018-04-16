@@ -8,8 +8,7 @@ def main():
     env = gym.make('CartPole-v0')
     nprand.seed(123)
     env.seed(123)
-    env.render()
-     
+
     gamma = 0.99 # PARAM
     eps = 0.05 # PARAM
     alpha = 0.7 # PARAM
