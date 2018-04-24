@@ -17,11 +17,7 @@ NUM_TEST = 1
 EPOCHS_PER_TEST = 10
 
 def get_model(state_shape, num_actions):#PARAM
-    return Sequential([InputLayer(input_shape=state_shape),
-                       Dense(4, activation='relu'),
-                       Dense(4, activation='relu'),
-                       Dense(4, activation='relu'),
-                       Dense(num_actions)])
+
 
 def test(test_id):
     np.random.seed(test_id)
